@@ -71,6 +71,27 @@ SafetensorsFile::SafetensorsFile(const std::string &filename) : TensorFile(filen
 #endif // NDEBUG
 }
 
+SafetensorsFile::SafetensorsFile(const void * const address, size_t num_bytes) : TensorFile("") {
+    // as far as I can tell, safetensors are saved in C order
+    std::string warn, err;
+    bool ret = safetensors::mmap_from_memory(static_cast<const uint8_t*>(address), num_bytes, "",  &st_, &warn, &err);
+    if (warn.size() > 0) {
+        std::cout << "safetensors-cpp WARN: " << warn << "\n";
+    }
+    if (ret == false) {
+        std::cerr << "  ERR: " << err << "\n";
+        throw std::runtime_error("Could not load safetensors from address");
+    }
+#ifndef NDEBUG
+    // Check if data_offsets are valid
+    if (!safetensors::validate_data_offsets(st_, err)) {
+        std::cerr << "Invalid data_offsets\n";
+        std::cerr << err << "\n";
+        throw std::runtime_error("Invalid safetensors address");
+    }
+#endif // NDEBUG
+}
+
 SafetensorsFile::~SafetensorsFile() {
     if (st_.st_file != nullptr) {
         // delete st_.st_file;

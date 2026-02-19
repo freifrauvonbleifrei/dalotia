@@ -31,6 +31,8 @@ class SafetensorsFile : public TensorFile {
    public:
     explicit SafetensorsFile(const std::string &filename);
 
+    SafetensorsFile(const void * const address, size_t num_bytes);
+
     ~SafetensorsFile() override;
 
     const std::vector<std::string> &get_tensor_names() const override;

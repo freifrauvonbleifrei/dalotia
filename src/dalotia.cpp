@@ -48,7 +48,7 @@ TensorFile *make_tensor_file(const std::string &filename) {
                    ::tolower);
 
     // select the file implementation
-    if (extension == "safetensors") {
+    if (extension == "safetensors" || extension == "st") {
 #ifdef DALOTIA_WITH_SAFETENSORS_CPP
         return new SafetensorsFile(filename);
 #else   // DALOTIA_WITH_SAFETENSORS_CPP
@@ -66,12 +66,36 @@ TensorFile *make_tensor_file(const std::string &filename) {
     return nullptr;
 }
 
+
+// factory function for the file, selected by file extension and
+// available implementations
+TensorFile *load_tensor_file_from_memory(const void * const address, size_t num_bytes, const std::string &format) {
+    auto& extension = format;
+    // select the file implementation
+    if (extension == "safetensors") {
+#ifdef DALOTIA_WITH_SAFETENSORS_CPP
+        return new SafetensorsFile(address, num_bytes);
+#else   // DALOTIA_WITH_SAFETENSORS_CPP
+        throw std::runtime_error("Safetensors support not enabled");
+#endif  // DALOTIA_WITH_SAFETENSORS_CPP
+    } else {
+        throw std::runtime_error("Unsupported memory format: ." + extension);
+    }
+    return nullptr;
+}
+
 }  // namespace dalotia
 
 DalotiaTensorFile *dalotia_open_file(const char *filename) {
     return reinterpret_cast<DalotiaTensorFile *>(
         dalotia::make_tensor_file(std::string(filename)));
 }
+
+DalotiaTensorFile *dalotia_load_file_from_memory(const void * const address, size_t num_bytes, const char *format) {
+    return reinterpret_cast<DalotiaTensorFile *>(
+        dalotia::load_tensor_file_from_memory(address, num_bytes, std::string(format)));
+}
+
 
 void dalotia_close_file(DalotiaTensorFile *file) {
     delete reinterpret_cast<dalotia::TensorFile *>(file);
