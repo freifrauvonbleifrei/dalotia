@@ -17,6 +17,8 @@ typedef struct DalotiaTensorFile DalotiaTensorFile;
 
 EXTERNC DalotiaTensorFile *dalotia_open_file(const char *filename);
 
+EXTERNC DalotiaTensorFile *dalotia_load_file_from_memory(const void *address, size_t num_bytes, const char *format);
+
 EXTERNC void dalotia_close_file(DalotiaTensorFile *file);
 
 EXTERNC int dalotia_sizeof_weight_format(dalotia_WeightFormat format);

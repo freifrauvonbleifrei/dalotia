@@ -26,6 +26,8 @@ namespace dalotia {
 // available implementations
 [[nodiscard]] TensorFile *make_tensor_file(const std::string & filename);
 
+[[nodiscard]] TensorFile *load_tensor_file_from_memory(const void * const address, size_t num_bytes, const char *format);
+
 // C++17 version -> will not compile on Fugaku...
 // -- pmr vector types can accept different allocators
 //? more memory interface than that? detect if CUDA device pointer through
